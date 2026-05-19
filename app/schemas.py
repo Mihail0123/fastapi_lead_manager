@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -8,7 +10,7 @@ class LeadCreate(BaseModel):
 
 
 class LeadUpdate(BaseModel):
-    status: str
+    status: Literal["new", "contacted", "qualified", "lost"]
 
 
 class LeadRead(BaseModel):
