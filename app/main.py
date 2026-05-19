@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
 from app.models.lead import Lead
-from app.schemas import LeadCreate, LeadRead
+from app.schemas import LeadCreate, LeadRead, LeadUpdate
 
 Base.metadata.create_all(bind=engine)
 
@@ -58,5 +58,23 @@ def get_lead(lead_id: int, db: Session = Depends(get_db)):
             status_code=404,
             detail=f"Lead with id {lead_id} doesn't exist"
         )
+
+    return lead
+
+
+@app.patch("/leads/{lead_id}", response_model=LeadRead)
+def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_db)):
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+
+    if not lead:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Lead with id {lead_id} doesn't exist"
+        )
+
+    lead.status = lead_data.status
+
+    db.commit()
+    db.refresh(lead)
 
     return lead

@@ -7,6 +7,10 @@ class LeadCreate(BaseModel):
     source: str
 
 
+class LeadUpdate(BaseModel):
+    status: str
+
+
 class LeadRead(BaseModel):
     id: int
     name: str
