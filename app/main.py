@@ -41,3 +41,9 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     db.refresh(lead)
 
     return lead
+
+
+@app.get("/leads", response_model=list[LeadRead])
+def get_leads(db: Session = Depends(get_db)):
+    leads = db.query(Lead).order_by(Lead.id).all()
+    return leads
