@@ -1,6 +1,13 @@
-from typing import Literal
+from enum import Enum
 
 from pydantic import BaseModel, EmailStr
+
+
+class LeadStatus(str, Enum):
+        new="new"
+        contacted="contacted"
+        qualified="qualified"
+        lost="lost"
 
 
 class LeadCreate(BaseModel):
@@ -10,7 +17,7 @@ class LeadCreate(BaseModel):
 
 
 class LeadUpdate(BaseModel):
-    status: Literal["new", "contacted", "qualified", "lost"]
+    status: LeadStatus
 
 
 class LeadRead(BaseModel):
