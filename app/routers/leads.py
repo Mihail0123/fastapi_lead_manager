@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
-from app.schemas import LeadCreate, LeadRead, LeadUpdate
+from app.schemas import LeadCreate, LeadRead, LeadUpdate, LeadStatus
 
 router = APIRouter(
     prefix="/leads",
@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=LeadRead)
+@router.post("", response_model=LeadRead, status_code=201)
 def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     email = str(lead_data.email)
 
@@ -27,8 +27,9 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[LeadRead])
-def get_leads(db: Session = Depends(get_db)):
-    return crud.get_leads(db)
+def get_leads(status: LeadStatus | None = None, db: Session = Depends(get_db)):
+    status_value = status.value if status else None
+    return crud.get_leads(db, status=status_value)
 
 
 @router.get("/{lead_id}", response_model=LeadRead)

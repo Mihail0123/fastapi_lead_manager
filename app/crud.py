@@ -4,8 +4,13 @@ from app.models.lead import Lead
 from app.schemas import LeadCreate, LeadUpdate
 
 
-def get_leads(db: Session):
-    return db.query(Lead).order_by(Lead.id).all()
+def get_leads(db: Session, status: str | None = None):
+    query = db.query(Lead)
+
+    if status:
+        query = query.filter(Lead.status == status)
+
+    return query.order_by(Lead.id).all()
 
 
 def get_lead_by_id(db: Session, lead_id: int):
