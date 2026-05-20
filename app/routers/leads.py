@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -29,8 +29,8 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 @router.get("", response_model=list[LeadRead])
 def get_leads(
     status: LeadStatus | None = None,
-    skip: int = 0,
-    limit: int = 10,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
     status_value = status.value if status else None
