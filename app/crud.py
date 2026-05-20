@@ -4,11 +4,20 @@ from app.models.lead import Lead
 from app.schemas import LeadCreate, LeadUpdate
 
 
-def get_leads(db: Session, status: str | None = None, skip: int = 0, limit: int = 10):
+def get_leads(
+    db: Session,
+    status: str | None = None,
+    source: str | None = None,
+    skip: int = 0,
+    limit: int = 10,
+):
     query = db.query(Lead)
 
     if status:
         query = query.filter(Lead.status == status)
+
+    if source:
+        query = query.filter(Lead.source == source)
 
     return query.order_by(Lead.id).offset(skip).limit(limit).all()
 
