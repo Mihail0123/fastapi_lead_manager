@@ -78,3 +78,19 @@ def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_d
     db.refresh(lead)
 
     return lead
+
+
+@app.delete("/leads/{lead_id}")
+def delete_lead(lead_id: int, db: Session = Depends(get_db)):
+    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+
+    if not lead:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Lead with id {lead_id} doesn't exist"
+        )
+
+    db.delete(lead)
+    db.commit()
+
+    return {"message": f"Lead with id {lead_id} deleted successfully"}
