@@ -2,8 +2,8 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
-from app.models.lead import Lead
 from app.schemas import LeadCreate, LeadRead, LeadUpdate
+from app import crud
 
 Base.metadata.create_all(bind=engine)
 
@@ -22,36 +22,27 @@ def health_check():
 
 @app.post("/leads", response_model=LeadRead)
 def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
-    existing_lead = db.query(Lead).filter(Lead.email == lead_data.email).first()
+    email = str(lead_data.email)
+
+    existing_lead = crud.get_lead_by_email(db, email)
 
     if existing_lead:
         raise HTTPException(
             status_code=400,
-            detail=f"Lead with email {lead_data.email} already exists"
+            detail=f"Lead with email {lead_data.email} already exists",
         )
 
-    lead = Lead(
-        name=lead_data.name,
-        email=lead_data.email,
-        source=lead_data.source,
-    )
-
-    db.add(lead)
-    db.commit()
-    db.refresh(lead)
-
-    return lead
+    return crud.create_lead(db, lead_data)
 
 
 @app.get("/leads", response_model=list[LeadRead])
 def get_leads(db: Session = Depends(get_db)):
-    leads = db.query(Lead).order_by(Lead.id).all()
-    return leads
+    return crud.get_leads(db)
 
 
 @app.get("/leads/{lead_id}", response_model=LeadRead)
 def get_lead(lead_id: int, db: Session = Depends(get_db)):
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
         raise HTTPException(
@@ -64,25 +55,20 @@ def get_lead(lead_id: int, db: Session = Depends(get_db)):
 
 @app.patch("/leads/{lead_id}", response_model=LeadRead)
 def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_db)):
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
         raise HTTPException(
             status_code=404,
-            detail=f"Lead with id {lead_id} doesn't exist"
+            detail=f"Lead with id {lead_id} doesn't exist",
         )
 
-    lead.status = lead_data.status
-
-    db.commit()
-    db.refresh(lead)
-
-    return lead
+    return crud.update_lead_status(db, lead, lead_data)
 
 
 @app.delete("/leads/{lead_id}")
 def delete_lead(lead_id: int, db: Session = Depends(get_db)):
-    lead = db.query(Lead).filter(Lead.id == lead_id).first()
+    lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
         raise HTTPException(
@@ -90,7 +76,6 @@ def delete_lead(lead_id: int, db: Session = Depends(get_db)):
             detail=f"Lead with id {lead_id} doesn't exist"
         )
 
-    db.delete(lead)
-    db.commit()
+    crud.delete_lead(db, lead)
 
     return {"message": f"Lead with id {lead_id} deleted successfully"}
