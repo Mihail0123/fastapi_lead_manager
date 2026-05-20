@@ -27,9 +27,14 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=list[LeadRead])
-def get_leads(status: LeadStatus | None = None, db: Session = Depends(get_db)):
+def get_leads(
+    status: LeadStatus | None = None,
+    skip: int = 0,
+    limit: int = 10,
+    db: Session = Depends(get_db),
+):
     status_value = status.value if status else None
-    return crud.get_leads(db, status=status_value)
+    return crud.get_leads(db, status=status_value, skip=skip, limit=limit)
 
 
 @router.get("/{lead_id}", response_model=LeadRead)
