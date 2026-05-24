@@ -30,7 +30,7 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 def get_leads(
     status: LeadStatus | None = None,
     source: str | None = None,
-    search: str | None = None,
+    search: str | None = Query(default=None, min_length=1, max_length=100),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=10, ge=1, le=100),
     db: Session = Depends(get_db),
