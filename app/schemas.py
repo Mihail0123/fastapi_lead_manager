@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr
@@ -26,6 +27,7 @@ class LeadRead(BaseModel):
     email: EmailStr
     source: str
     status: str
+    created_at: datetime
 
     model_config = {
         "from_attributes": True
