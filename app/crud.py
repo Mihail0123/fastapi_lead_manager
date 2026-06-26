@@ -24,7 +24,8 @@ def get_leads(
         search_pattern = f"%{search}%"
         query = query.filter(
             (Lead.name.ilike(search_pattern)) |
-            (Lead.email.ilike(search_pattern))
+            (Lead.email.ilike(search_pattern)) |
+            (Lead.company.ilike(search_pattern))
         )
 
     return query.order_by(Lead.id).offset(skip).limit(limit).all()
