@@ -5,15 +5,16 @@ from pydantic import BaseModel, EmailStr
 
 
 class LeadStatus(str, Enum):
-        new="new"
-        contacted="contacted"
-        qualified="qualified"
-        lost="lost"
+    new = "new"
+    contacted = "contacted"
+    qualified = "qualified"
+    lost = "lost"
 
 
 class LeadCreate(BaseModel):
     name: str
     email: EmailStr
+    company: str | None = None
     source: str
 
 
@@ -25,8 +26,9 @@ class LeadRead(BaseModel):
     id: int
     name: str
     email: EmailStr
+    company: str | None
     source: str
-    status: str
+    status: LeadStatus
     created_at: datetime
     updated_at: datetime
 

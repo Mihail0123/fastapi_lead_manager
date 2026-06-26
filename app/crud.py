@@ -42,6 +42,7 @@ def create_lead(db: Session, lead_data: LeadCreate):
     lead = Lead(
         name=lead_data.name,
         email=lead_data.email,
+        company=lead_data.company,
         source=lead_data.source,
     )
 
