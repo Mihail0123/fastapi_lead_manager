@@ -73,3 +73,27 @@ def test_create_lead_strips_whitespace(client: TestClient):
     assert data["name"] == "Bob Stone"
     assert data["company"] == "Stone Ltd"
     assert data["source"] == "manual"
+
+def test_get_leads_returns_created_leads(client: TestClient):
+    payload = {
+        "name": "Alice Cooper",
+        "email": "alice@example.com",
+        "company": "Music Ltd",
+        "source": "website",
+    }
+
+    create_response = client.post("/leads", json=payload)
+    list_response = client.get("/leads")
+
+    assert create_response.status_code == 201
+    assert list_response.status_code == 200
+
+    data = list_response.json()
+
+    assert len(data) == 1
+    assert data[0]["name"] == "Alice Cooper"
+    assert data[0]["email"] == "alice@example.com"
+    assert data[0]["company"] == "Music Ltd"
+    assert data[0]["source"] == "website"
+    assert data[0]["status"] == "new"
+
