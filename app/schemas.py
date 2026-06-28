@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class LeadStatus(str, Enum):
@@ -12,10 +12,10 @@ class LeadStatus(str, Enum):
 
 
 class LeadCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=100)
     email: EmailStr
-    company: str | None = None
-    source: str
+    company: str | None = Field(default=None, min_length=1, max_length=100)
+    source: str = Field(min_length=1, max_length=100)
 
 
 class LeadUpdate(BaseModel):
