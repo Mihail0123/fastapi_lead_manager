@@ -24,6 +24,7 @@ def test_create_lead(client: TestClient):
     assert "created_at" in data
     assert "updated_at" in data
 
+
 def test_create_lead_duplicate_email_returns_400(client: TestClient):
     payload = {
         "name": "John Smith",
@@ -41,3 +42,15 @@ def test_create_lead_duplicate_email_returns_400(client: TestClient):
         "detail": "Lead with email john@example.com already exists"
     }
 
+
+def test_create_lead_with_empty_fields_returns_422(client: TestClient):
+    payload = {
+        "name": "",
+        "email": "test@example.com",
+        "company": "",
+        "source": "",
+    }
+
+    response = client.post("/leads", json=payload)
+
+    assert response.status_code == 422
