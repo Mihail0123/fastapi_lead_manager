@@ -3,7 +3,14 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
-from app.schemas import LeadCount, LeadCreate, LeadRead, LeadStatus, LeadUpdate
+from app.schemas import (
+    LeadCount,
+    LeadCreate,
+    LeadDeleteResponse,
+    LeadRead,
+    LeadStatus,
+    LeadUpdate,
+)
 
 router = APIRouter(
     prefix="/leads",
@@ -92,7 +99,7 @@ def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_d
     return crud.update_lead_status(db, lead, lead_data)
 
 
-@router.delete("/{lead_id}")
+@router.delete("/{lead_id}", response_model=LeadDeleteResponse)
 def delete_lead(lead_id: int, db: Session = Depends(get_db)):
     lead = crud.get_lead_by_id(db, lead_id)
 

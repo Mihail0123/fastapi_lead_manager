@@ -36,5 +36,10 @@ class LeadRead(BaseModel):
         "from_attributes": True
     }
 
+
 class LeadCount(BaseModel):
     count: int
+
+
+class LeadDeleteResponse(BaseModel):
+    message: str
