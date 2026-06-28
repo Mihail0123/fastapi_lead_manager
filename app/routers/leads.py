@@ -28,12 +28,12 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 
 @router.get("", response_model=list[LeadRead])
 def get_leads(
-    status: LeadStatus | None = None,
-    source: str | None = None,
-    search: str | None = Query(default=None, min_length=1, max_length=100),
-    skip: int = Query(default=0, ge=0),
-    limit: int = Query(default=10, ge=1, le=100),
-    db: Session = Depends(get_db),
+        status: LeadStatus | None = None,
+        source: str | None = None,
+        search: str | None = Query(default=None, min_length=1, max_length=100),
+        skip: int = Query(default=0, ge=0),
+        limit: int = Query(default=10, ge=1, le=100),
+        db: Session = Depends(get_db),
 ):
     status_value = status.value if status else None
 
@@ -45,6 +45,25 @@ def get_leads(
         skip=skip,
         limit=limit,
     )
+
+
+@router.get("/count")
+def count_leads(
+        status: LeadStatus | None = None,
+        source: str | None = None,
+        search: str | None = Query(default=None, min_length=1, max_length=100),
+        db: Session = Depends(get_db),
+):
+    status_value = status.value if status else None
+
+    count = crud.count_leads(
+        db,
+        status=status_value,
+        source=source,
+        search=search,
+    )
+
+    return {"count": count}
 
 
 @router.get("/{lead_id}", response_model=LeadRead)

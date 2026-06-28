@@ -30,6 +30,30 @@ def get_leads(
 
     return query.order_by(Lead.id).offset(skip).limit(limit).all()
 
+def count_leads(
+    db: Session,
+    status: str | None = None,
+    source: str | None = None,
+    search: str | None = None,
+):
+    query = db.query(Lead)
+
+    if status:
+        query = query.filter(Lead.status == status)
+
+    if source:
+        query = query.filter(Lead.source == source)
+
+    if search:
+        search_pattern = f"%{search}%"
+        query = query.filter(
+            (Lead.name.ilike(search_pattern)) |
+            (Lead.email.ilike(search_pattern)) |
+            (Lead.company.ilike(search_pattern))
+        )
+
+    return query.count()
+
 
 def get_lead_by_id(db: Session, lead_id: int):
     return db.query(Lead).filter(Lead.id == lead_id).first()
