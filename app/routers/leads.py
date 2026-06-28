@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 
 from app import crud
@@ -74,7 +74,7 @@ def count_leads(
 
 
 @router.get("/{lead_id}", response_model=LeadRead)
-def get_lead(lead_id: int, db: Session = Depends(get_db)):
+def get_lead(lead_id: int = Path(ge=1), db: Session = Depends(get_db)):
     lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
@@ -87,7 +87,11 @@ def get_lead(lead_id: int, db: Session = Depends(get_db)):
 
 
 @router.patch("/{lead_id}", response_model=LeadRead)
-def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_db)):
+def update_lead(
+    lead_data: LeadUpdate,
+    lead_id: int = Path(ge=1),
+    db: Session = Depends(get_db),
+):
     lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
@@ -100,7 +104,7 @@ def update_lead(lead_id: int, lead_data: LeadUpdate, db: Session = Depends(get_d
 
 
 @router.delete("/{lead_id}", response_model=LeadDeleteResponse)
-def delete_lead(lead_id: int, db: Session = Depends(get_db)):
+def delete_lead(lead_id: int = Path(ge=1), db: Session = Depends(get_db)):
     lead = crud.get_lead_by_id(db, lead_id)
 
     if not lead:
