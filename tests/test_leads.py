@@ -54,3 +54,22 @@ def test_create_lead_with_empty_fields_returns_422(client: TestClient):
     response = client.post("/leads", json=payload)
 
     assert response.status_code == 422
+
+
+def test_create_lead_strips_whitespace(client: TestClient):
+    payload = {
+        "name": "   Bob Stone   ",
+        "email": "bob@example.com",
+        "company": "   Stone Ltd   ",
+        "source": "   manual   ",
+    }
+
+    response = client.post("/leads", json=payload)
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    assert data["name"] == "Bob Stone"
+    assert data["company"] == "Stone Ltd"
+    assert data["source"] == "manual"
