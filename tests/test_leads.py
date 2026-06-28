@@ -97,3 +97,38 @@ def test_get_leads_returns_created_leads(client: TestClient):
     assert data[0]["source"] == "website"
     assert data[0]["status"] == "new"
 
+def test_get_lead_by_id(client: TestClient):
+    payload = {
+        "name": "Charlie Brown",
+        "email": "charlie@example.com",
+        "company": "Peanuts Inc",
+        "source": "referral",
+    }
+
+    create_response = client.post("/leads", json=payload)
+
+    assert create_response.status_code == 201
+
+    created_lead = create_response.json()
+    lead_id = created_lead["id"]
+
+    detail_response = client.get(f"/leads/{lead_id}")
+
+    assert detail_response.status_code == 200
+
+    data = detail_response.json()
+
+    assert data["id"] == lead_id
+    assert data["name"] == "Charlie Brown"
+    assert data["email"] == "charlie@example.com"
+    assert data["company"] == "Peanuts Inc"
+    assert data["source"] == "referral"
+    assert data["status"] == "new"
+
+def test_get_lead_by_unknown_id_returns_404(client: TestClient):
+    response = client.get("/leads/999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Lead with id 999 doesn't exist"
+    }
