@@ -35,3 +35,6 @@ class LeadRead(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class LeadCount(BaseModel):
+    count: int

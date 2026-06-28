@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.database import get_db
-from app.schemas import LeadCreate, LeadRead, LeadUpdate, LeadStatus
+from app.schemas import LeadCount, LeadCreate, LeadRead, LeadStatus, LeadUpdate
 
 router = APIRouter(
     prefix="/leads",
@@ -47,7 +47,7 @@ def get_leads(
     )
 
 
-@router.get("/count")
+@router.get("/count", response_model=LeadCount)
 def count_leads(
         status: LeadStatus | None = None,
         source: str | None = None,
