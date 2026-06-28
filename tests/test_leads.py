@@ -132,3 +132,52 @@ def test_get_lead_by_unknown_id_returns_404(client: TestClient):
     assert response.json() == {
         "detail": "Lead with id 999 doesn't exist"
     }
+
+def test_update_lead_status(client: TestClient):
+    payload = {
+        "name": "Diana Prince",
+        "email": "diana@example.com",
+        "company": "Amazon Corp",
+        "source": "website",
+    }
+
+    create_response = client.post("/leads", json=payload)
+
+    assert create_response.status_code == 201
+
+    lead_id = create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/leads/{lead_id}",
+        json={"status": "qualified"},
+    )
+
+    assert update_response.status_code == 200
+
+    data = update_response.json()
+
+    assert data["id"] == lead_id
+    assert data["status"] == "qualified"
+    assert data["name"] == "Diana Prince"
+    assert data["email"] == "diana@example.com"
+
+def test_update_lead_with_invalid_status_returns_422(client: TestClient):
+    payload = {
+        "name": "Edward Nygma",
+        "email": "edward@example.com",
+        "company": "Puzzle Ltd",
+        "source": "manual",
+    }
+
+    create_response = client.post("/leads", json=payload)
+
+    assert create_response.status_code == 201
+
+    lead_id = create_response.json()["id"]
+
+    update_response = client.patch(
+        f"/leads/{lead_id}",
+        json={"status": "banana"},
+    )
+
+    assert update_response.status_code == 422
