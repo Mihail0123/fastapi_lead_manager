@@ -4,16 +4,12 @@ from app.models.lead import Lead
 from app.schemas import LeadCreate, LeadUpdate
 
 
-def get_leads(
-    db: Session,
-    status: str | None = None,
-    source: str | None = None,
-    search:str | None = None,
-    skip: int = 0,
-    limit: int = 10,
+def _apply_lead_filters(
+        query,
+        status: str | None = None,
+        source: str | None = None,
+        search: str | None = None,
 ):
-    query = db.query(Lead)
-
     if status:
         query = query.filter(Lead.status == status)
 
@@ -27,30 +23,44 @@ def get_leads(
             (Lead.email.ilike(search_pattern)) |
             (Lead.company.ilike(search_pattern))
         )
+
+    return query
+
+
+def get_leads(
+        db: Session,
+        status: str | None = None,
+        source: str | None = None,
+        search: str | None = None,
+        skip: int = 0,
+        limit: int = 10,
+):
+    query = db.query(Lead)
+
+    query = _apply_lead_filters(
+        query,
+        status=status,
+        source=source,
+        search=search,
+    )
 
     return query.order_by(Lead.id).offset(skip).limit(limit).all()
 
+
 def count_leads(
-    db: Session,
-    status: str | None = None,
-    source: str | None = None,
-    search: str | None = None,
+        db: Session,
+        status: str | None = None,
+        source: str | None = None,
+        search: str | None = None,
 ):
     query = db.query(Lead)
 
-    if status:
-        query = query.filter(Lead.status == status)
-
-    if source:
-        query = query.filter(Lead.source == source)
-
-    if search:
-        search_pattern = f"%{search}%"
-        query = query.filter(
-            (Lead.name.ilike(search_pattern)) |
-            (Lead.email.ilike(search_pattern)) |
-            (Lead.company.ilike(search_pattern))
-        )
+    query = _apply_lead_filters(
+        query,
+        status=status,
+        source=source,
+        search=search,
+    )
 
     return query.count()
 
