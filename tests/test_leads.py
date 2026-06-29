@@ -398,3 +398,13 @@ def test_get_leads_pagination(client: TestClient):
 
     assert len(data) == 1
     assert data[0]["email"] == "second@example.com"
+
+
+def test_get_leads_invalid_pagination_returns_422(client: TestClient):
+    negative_skip_response = client.get("/leads?skip=-1")
+    zero_limit_response = client.get("/leads?limit=0")
+    too_large_limit_response = client.get("/leads?limit=101")
+
+    assert negative_skip_response.status_code == 422
+    assert zero_limit_response.status_code == 422
+    assert too_large_limit_response.status_code == 422
