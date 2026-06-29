@@ -408,3 +408,9 @@ def test_get_leads_invalid_pagination_returns_422(client: TestClient):
     assert negative_skip_response.status_code == 422
     assert zero_limit_response.status_code == 422
     assert too_large_limit_response.status_code == 422
+
+
+def test_get_lead_with_invalid_id_returns_422(client: TestClient):
+    response = client.get("/leads/0")
+
+    assert response.status_code == 422
