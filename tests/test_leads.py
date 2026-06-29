@@ -426,3 +426,172 @@ def test_update_unknown_lead_returns_404(client: TestClient):
     assert response.json() == {
         "detail": "Lead with id 999 doesn't exist"
     }
+
+
+def test_create_lead_without_company_sets_company_to_none(client: TestClient):
+    payload = {
+        "name": "No Company Lead",
+        "email": "nocompany@example.com",
+        "source": "website",
+    }
+
+    response = client.post("/leads", json=payload)
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    assert data["name"] == "No Company Lead"
+    assert data["email"] == "nocompany@example.com"
+    assert data["company"] is None
+    assert data["source"] == "website"
+    assert data["status"] == "new"
+
+
+def test_create_lead_with_whitespace_only_fields_returns_422(client: TestClient):
+    payload = {
+        "name": "   ",
+        "email": "spaces@example.com",
+        "company": "   ",
+        "source": "   ",
+    }
+
+    response = client.post("/leads", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_get_leads_invalid_status_filter_returns_422(client: TestClient):
+    response = client.get("/leads?status=banana")
+
+    assert response.status_code == 422
+
+
+def test_get_leads_empty_search_returns_422(client: TestClient):
+    response = client.get("/leads?search=")
+
+    assert response.status_code == 422
+
+
+def test_count_leads_filters_by_status(client: TestClient):
+    first_payload = {
+        "name": "New Count Lead",
+        "email": "new-count@example.com",
+        "company": "New Count Corp",
+        "source": "website",
+    }
+
+    second_payload = {
+        "name": "Qualified Count Lead",
+        "email": "qualified-count@example.com",
+        "company": "Qualified Count Corp",
+        "source": "manual",
+    }
+
+    first_response = client.post("/leads", json=first_payload)
+    second_response = client.post("/leads", json=second_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+
+    second_lead_id = second_response.json()["id"]
+
+    update_response = client.patch(
+        f"/leads/{second_lead_id}",
+        json={"status": "qualified"},
+    )
+
+    assert update_response.status_code == 200
+
+    count_response = client.get("/leads/count?status=qualified")
+
+    assert count_response.status_code == 200
+    assert count_response.json() == {"count": 1}
+
+
+def test_count_leads_filters_by_source(client: TestClient):
+    website_payload = {
+        "name": "Website Count Lead",
+        "email": "website-count@example.com",
+        "company": "Website Count Corp",
+        "source": "website",
+    }
+
+    manual_payload = {
+        "name": "Manual Count Lead",
+        "email": "manual-count@example.com",
+        "company": "Manual Count Corp",
+        "source": "manual",
+    }
+
+    website_response = client.post("/leads", json=website_payload)
+    manual_response = client.post("/leads", json=manual_payload)
+
+    assert website_response.status_code == 201
+    assert manual_response.status_code == 201
+
+    count_response = client.get("/leads/count?source=manual")
+
+    assert count_response.status_code == 200
+    assert count_response.json() == {"count": 1}
+
+
+def test_count_leads_filters_by_search(client: TestClient):
+    first_payload = {
+        "name": "Search Count Lead",
+        "email": "search-count@example.com",
+        "company": "Count Search Corp",
+        "source": "website",
+    }
+
+    second_payload = {
+        "name": "Other Count Lead",
+        "email": "other-count@example.com",
+        "company": "Other Corp",
+        "source": "manual",
+    }
+
+    first_response = client.post("/leads", json=first_payload)
+    second_response = client.post("/leads", json=second_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+
+    count_response = client.get("/leads/count?search=count search")
+    empty_count_response = client.get("/leads/count?search=notfound")
+
+    assert count_response.status_code == 200
+    assert empty_count_response.status_code == 200
+
+    assert count_response.json() == {"count": 1}
+    assert empty_count_response.json() == {"count": 0}
+
+
+def test_count_leads_empty_search_returns_422(client: TestClient):
+    response = client.get("/leads/count?search=")
+
+    assert response.status_code == 422
+
+
+def test_delete_unknown_lead_returns_404(client: TestClient):
+    response = client.delete("/leads/999")
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Lead with id 999 doesn't exist"
+    }
+
+
+def test_update_lead_with_invalid_id_returns_422(client: TestClient):
+    response = client.patch(
+        "/leads/0",
+        json={"status": "qualified"},
+    )
+
+    assert response.status_code == 422
+
+
+def test_delete_lead_with_invalid_id_returns_422(client: TestClient):
+    response = client.delete("/leads/0")
+
+    assert response.status_code == 422
