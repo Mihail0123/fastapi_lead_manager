@@ -244,3 +244,117 @@ def test_count_leads(client: TestClient):
 
     assert count_response.status_code == 200
     assert count_response.json() == {"count": 2}
+
+
+def test_get_leads_filters_by_status(client: TestClient):
+    first_payload = {
+        "name": "New Lead",
+        "email": "new@example.com",
+        "company": "New Corp",
+        "source": "website",
+    }
+
+    second_payload = {
+        "name": "Qualified Lead",
+        "email": "qualified@example.com",
+        "company": "Qualified Corp",
+        "source": "manual",
+    }
+
+    first_response = client.post("/leads", json=first_payload)
+    second_response = client.post("/leads", json=second_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+
+    second_lead_id = second_response.json()["id"]
+
+    update_response = client.patch(
+        f"/leads/{second_lead_id}",
+        json={"status": "qualified"},
+    )
+
+    assert update_response.status_code == 200
+
+    filtered_response = client.get("/leads?status=qualified")
+
+    assert filtered_response.status_code == 200
+
+    data = filtered_response.json()
+
+    assert len(data) == 1
+    assert data[0]["email"] == "qualified@example.com"
+    assert data[0]["status"] == "qualified"
+
+
+def test_get_leads_filters_by_source(client: TestClient):
+    website_payload = {
+        "name": "Website Lead",
+        "email": "website@example.com",
+        "company": "Web Corp",
+        "source": "website",
+    }
+
+    manual_payload = {
+        "name": "Manual Lead",
+        "email": "manual@example.com",
+        "company": "Manual Corp",
+        "source": "manual",
+    }
+
+    website_response = client.post("/leads", json=website_payload)
+    manual_response = client.post("/leads", json=manual_payload)
+
+    assert website_response.status_code == 201
+    assert manual_response.status_code == 201
+
+    filtered_response = client.get("/leads?source=manual")
+
+    assert filtered_response.status_code == 200
+
+    data = filtered_response.json()
+
+    assert len(data) == 1
+    assert data[0]["email"] == "manual@example.com"
+    assert data[0]["source"] == "manual"
+
+
+def test_get_leads_searches_by_name_email_and_company(client: TestClient):
+    first_payload = {
+        "name": "Searchable Person",
+        "email": "searchable@example.com",
+        "company": "Acme Search Corp",
+        "source": "website",
+    }
+
+    second_payload = {
+        "name": "Another Person",
+        "email": "another@example.com",
+        "company": "Different Corp",
+        "source": "manual",
+    }
+
+    first_response = client.post("/leads", json=first_payload)
+    second_response = client.post("/leads", json=second_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+
+    name_search_response = client.get("/leads?search=searchable")
+    email_search_response = client.get("/leads?search=searchable@example.com")
+    company_search_response = client.get("/leads?search=acme")
+    empty_search_response = client.get("/leads?search=notfound")
+
+    assert name_search_response.status_code == 200
+    assert email_search_response.status_code == 200
+    assert company_search_response.status_code == 200
+    assert empty_search_response.status_code == 200
+
+    assert len(name_search_response.json()) == 1
+    assert len(email_search_response.json()) == 1
+    assert len(company_search_response.json()) == 1
+    assert empty_search_response.json() == []
+
+    assert name_search_response.json()[0]["email"] == "searchable@example.com"
+    assert email_search_response.json()[0]["email"] == "searchable@example.com"
+    assert company_search_response.json()[0]["email"] == "searchable@example.com"
