@@ -358,3 +358,43 @@ def test_get_leads_searches_by_name_email_and_company(client: TestClient):
     assert name_search_response.json()[0]["email"] == "searchable@example.com"
     assert email_search_response.json()[0]["email"] == "searchable@example.com"
     assert company_search_response.json()[0]["email"] == "searchable@example.com"
+
+
+def test_get_leads_pagination(client: TestClient):
+    first_payload = {
+        "name": "First Lead",
+        "email": "first@example.com",
+        "company": "First Corp",
+        "source": "website",
+    }
+
+    second_payload = {
+        "name": "Second Lead",
+        "email": "second@example.com",
+        "company": "Second Corp",
+        "source": "manual",
+    }
+
+    third_payload = {
+        "name": "Third Lead",
+        "email": "third@example.com",
+        "company": "Third Corp",
+        "source": "referral",
+    }
+
+    first_response = client.post("/leads", json=first_payload)
+    second_response = client.post("/leads", json=second_payload)
+    third_response = client.post("/leads", json=third_payload)
+
+    assert first_response.status_code == 201
+    assert second_response.status_code == 201
+    assert third_response.status_code == 201
+
+    response = client.get("/leads?skip=1&limit=1")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["email"] == "second@example.com"
