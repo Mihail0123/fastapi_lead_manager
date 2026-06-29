@@ -414,3 +414,15 @@ def test_get_lead_with_invalid_id_returns_422(client: TestClient):
     response = client.get("/leads/0")
 
     assert response.status_code == 422
+
+
+def test_update_unknown_lead_returns_404(client: TestClient):
+    response = client.patch(
+        "/leads/999",
+        json={"status": "qualified"},
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {
+        "detail": "Lead with id 999 doesn't exist"
+    }
