@@ -1,5 +1,7 @@
 # FastAPI Lead Manager
 
+![Tests](https://github.com/Mihail0123/fastapi_lead_manager/actions/workflows/tests.yml/badge.svg)
+
 A small FastAPI project for managing leads.
 
 ## Tech stack
