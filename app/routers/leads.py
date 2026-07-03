@@ -10,6 +10,7 @@ from app.schemas import (
     LeadRead,
     LeadStatus,
     LeadUpdate,
+    LeadStatusStats,
 )
 
 router = APIRouter(
@@ -73,6 +74,11 @@ def count_leads(
     return {"count": count}
 
 
+@router.get("/stats/status", response_model=LeadStatusStats)
+def get_lead_status_stats(db: Session = Depends(get_db)):
+    return crud.get_lead_status_stats(db)
+
+
 @router.get("/{lead_id}", response_model=LeadRead)
 def get_lead(lead_id: int = Path(ge=1), db: Session = Depends(get_db)):
     lead = crud.get_lead_by_id(db, lead_id)
@@ -88,9 +94,9 @@ def get_lead(lead_id: int = Path(ge=1), db: Session = Depends(get_db)):
 
 @router.patch("/{lead_id}", response_model=LeadRead)
 def update_lead(
-    lead_data: LeadUpdate,
-    lead_id: int = Path(ge=1),
-    db: Session = Depends(get_db),
+        lead_data: LeadUpdate,
+        lead_id: int = Path(ge=1),
+        db: Session = Depends(get_db),
 ):
     lead = crud.get_lead_by_id(db, lead_id)
 

@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.models.lead import Lead
@@ -63,6 +64,26 @@ def count_leads(
     )
 
     return query.count()
+
+
+def get_lead_status_stats(db: Session):
+    rows = (
+        db.query(Lead.status, func.count(Lead.id))
+        .group_by(Lead.status)
+        .all()
+    )
+
+    stats = {
+        "new": 0,
+        "contacted": 0,
+        "qualified": 0,
+        "lost": 0,
+    }
+
+    for status, count in rows:
+        stats[status] = count
+
+    return stats
 
 
 def get_lead_by_id(db: Session, lead_id: int):

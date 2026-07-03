@@ -549,3 +549,56 @@ def test_get_leads_invalid_pagination_returns_422(client: TestClient):
     assert negative_skip_response.status_code == 422
     assert zero_limit_response.status_code == 422
     assert too_large_limit_response.status_code == 422
+
+
+def test_get_lead_status_stats(client: TestClient):
+    first_lead = create_lead(
+        client,
+        name="First Stats Lead",
+        email="first-stats@example.com",
+        company="Stats Corp",
+        source="website",
+    )
+    second_lead = create_lead(
+        client,
+        name="Second Stats Lead",
+        email="second-stats@example.com",
+        company="Stats Corp",
+        source="manual",
+    )
+    contacted_lead = create_lead(
+        client,
+        name="Contacted Stats Lead",
+        email="contacted-stats@example.com",
+        company="Stats Corp",
+        source="website",
+    )
+    qualified_lead = create_lead(
+        client,
+        name="Qualified Stats Lead",
+        email="qualified-stats@example.com",
+        company="Stats Corp",
+        source="referral",
+    )
+
+    contacted_response = client.patch(
+        f"/leads/{contacted_lead['id']}",
+        json={"status": "contacted"},
+    )
+    qualified_response = client.patch(
+        f"/leads/{qualified_lead['id']}",
+        json={"status": "qualified"},
+    )
+
+    assert contacted_response.status_code == 200
+    assert qualified_response.status_code == 200
+
+    response = client.get("/leads/stats/status")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "new": 2,
+        "contacted": 1,
+        "qualified": 1,
+        "lost": 0,
+    }

@@ -45,3 +45,10 @@ class LeadCount(BaseModel):
 
 class LeadDeleteResponse(BaseModel):
     message: str
+
+
+class LeadStatusStats(BaseModel):
+    new: int
+    contacted: int
+    qualified: int
+    lost: int
