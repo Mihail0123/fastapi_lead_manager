@@ -4,4 +4,4 @@ __pycache__/
 *.pyc
 *.db
 .idea/
-
+.pytest_cache/
