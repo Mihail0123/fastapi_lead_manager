@@ -10,7 +10,9 @@ A small FastAPI project for managing leads.
 * SQLAlchemy
 * SQLite
 * Alembic
+* Pydantic
 * Pytest
+* GitHub Actions
 
 ## Local setup
 
@@ -26,6 +28,26 @@ Install dependencies:
 ```powershell
 pip install -r requirements.txt
 ```
+
+Create local environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+## Environment variables
+
+The project uses environment variables from `.env`.
+
+Example:
+
+```env
+DATABASE_URL=sqlite:///./leads.db
+```
+
+The `.env` file is local and should not be committed.
+
+The `.env.example` file is committed and shows which variables are required.
 
 ## Database migrations
 
@@ -76,6 +98,8 @@ http://127.0.0.1:8000/health
 ```powershell
 pytest
 ```
+
+Tests use a separate in-memory SQLite database and do not touch the local `leads.db`.
 
 ## Main endpoints
 
@@ -135,19 +159,44 @@ qualified
 lost
 ```
 
+## Development workflow
+
+For a regular code change:
+
+```text
+change code
+-> run pytest
+-> commit
+-> push
+-> GitHub Actions runs tests again
+```
+
+For a database model change:
+
+```text
+change SQLAlchemy model
+-> create Alembic migration
+-> review migration file
+-> apply migration
+-> run pytest
+-> commit
+-> push
+```
+
+Commands:
+
+```powershell
+alembic revision --autogenerate -m "migration message"
+alembic upgrade head
+pytest
+```
+
 ## Project notes
 
 The application does not create database tables on startup.
 
-Database schema changes are handled through Alembic migrations:
-
-```text
-change SQLAlchemy model
--> create migration
--> review migration file
--> apply migration with alembic upgrade head
-```
-
-Tests use a separate in-memory SQLite database and do not touch the local `leads.db`.
+Database schema changes are handled through Alembic migrations.
 
 The local `leads.db` file is only for development and manual testing through Swagger.
+
+The `.venv` directory is local and ignored by Git. If the project is moved to another path, recreating `.venv` is usually safer than trying to repair old virtual environment paths.
