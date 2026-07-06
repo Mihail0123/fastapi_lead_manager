@@ -9,6 +9,7 @@ def _apply_lead_filters(
         query,
         status: str | None = None,
         source: str | None = None,
+        company: str | None = None,
         search: str | None = None,
 ):
     if status:
@@ -16,6 +17,9 @@ def _apply_lead_filters(
 
     if source:
         query = query.filter(Lead.source == source)
+
+    if company:
+        query = query.filter(Lead.company == company)
 
     if search:
         search_pattern = f"%{search}%"
@@ -33,6 +37,7 @@ def get_leads(
         db: Session,
         status: str | None = None,
         source: str | None = None,
+        company: str | None = None,
         search: str | None = None,
         skip: int = 0,
         limit: int = 10,
@@ -43,6 +48,7 @@ def get_leads(
         query,
         status=status,
         source=source,
+        company=company,
         search=search,
     )
 
@@ -53,6 +59,7 @@ def count_leads(
         db: Session,
         status: str | None = None,
         source: str | None = None,
+        company: str | None = None,
         search: str | None = None,
 ):
     query = db.query(Lead)
@@ -61,6 +68,7 @@ def count_leads(
         query,
         status=status,
         source=source,
+        company=company,
         search=search,
     )
 

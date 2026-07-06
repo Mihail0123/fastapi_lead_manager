@@ -38,6 +38,7 @@ def create_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
 def get_leads(
         status: LeadStatus | None = None,
         source: str | None = None,
+        company: str | None = Query(default=None, min_length=1, max_length=100),
         search: str | None = Query(default=None, min_length=1, max_length=100),
         skip: int = Query(default=0, ge=0),
         limit: int = Query(default=10, ge=1, le=100),
@@ -49,6 +50,7 @@ def get_leads(
         db,
         status=status_value,
         source=source,
+        company=company,
         search=search,
         skip=skip,
         limit=limit,
@@ -59,6 +61,7 @@ def get_leads(
 def count_leads(
         status: LeadStatus | None = None,
         source: str | None = None,
+        company: str | None = Query(default=None, min_length=1, max_length=100),
         search: str | None = Query(default=None, min_length=1, max_length=100),
         db: Session = Depends(get_db),
 ):
@@ -68,6 +71,7 @@ def count_leads(
         db,
         status=status_value,
         source=source,
+        company=company,
         search=search,
     )
 

@@ -700,3 +700,71 @@ def test_get_leads_searches_by_phone(client: TestClient):
     assert len(data) == 1
     assert data[0]["email"] == "phone-search@example.com"
     assert data[0]["phone"] == "+34999111222"
+
+
+def test_get_leads_filters_by_company(client: TestClient):
+    create_lead(
+        client,
+        name="Acme Lead",
+        email="acme-company@example.com",
+        company="Acme Inc",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Other Company Lead",
+        email="other-company@example.com",
+        company="Other Inc",
+        source="manual",
+    )
+
+    response = client.get("/leads?company=Acme Inc")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["email"] == "acme-company@example.com"
+    assert data[0]["company"] == "Acme Inc"
+
+
+def test_count_leads_filters_by_company(client: TestClient):
+    create_lead(
+        client,
+        name="First Acme Count Lead",
+        email="first-acme-count@example.com",
+        company="Acme Inc",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Second Acme Count Lead",
+        email="second-acme-count@example.com",
+        company="Acme Inc",
+        source="manual",
+    )
+    create_lead(
+        client,
+        name="Other Count Lead",
+        email="other-count-company@example.com",
+        company="Other Inc",
+        source="referral",
+    )
+
+    response = client.get("/leads/count?company=Acme Inc")
+
+    assert response.status_code == 200
+    assert response.json() == {"count": 2}
+
+
+def test_get_leads_empty_company_filter_returns_422(client: TestClient):
+    response = client.get("/leads?company=")
+
+    assert response.status_code == 422
+
+
+def test_count_leads_empty_company_filter_returns_422(client: TestClient):
+    response = client.get("/leads/count?company=")
+
+    assert response.status_code == 422
