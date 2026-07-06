@@ -602,3 +602,43 @@ def test_get_lead_status_stats(client: TestClient):
         "qualified": 1,
         "lost": 0,
     }
+
+
+def test_get_lead_source_stats(client: TestClient):
+    create_lead(
+        client,
+        name="Website Source Lead",
+        email="website-source@example.com",
+        company="Source Corp",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Second Website Source Lead",
+        email="second-website-source@example.com",
+        company="Source Corp",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Manual Source Lead",
+        email="manual-source@example.com",
+        company="Source Corp",
+        source="manual",
+    )
+    create_lead(
+        client,
+        name="Referral Source Lead",
+        email="referral-source@example.com",
+        company="Source Corp",
+        source="referral",
+    )
+
+    response = client.get("/leads/stats/source")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "manual": 1,
+        "referral": 1,
+        "website": 2,
+    }

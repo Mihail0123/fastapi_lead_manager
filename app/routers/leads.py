@@ -79,6 +79,11 @@ def get_lead_status_stats(db: Session = Depends(get_db)):
     return crud.get_lead_status_stats(db)
 
 
+@router.get("/stats/source", response_model=dict[str, int])
+def get_lead_source_stats(db: Session = Depends(get_db)):
+    return crud.get_lead_source_stats(db)
+
+
 @router.get("/{lead_id}", response_model=LeadRead)
 def get_lead(lead_id: int = Path(ge=1), db: Session = Depends(get_db)):
     lead = crud.get_lead_by_id(db, lead_id)

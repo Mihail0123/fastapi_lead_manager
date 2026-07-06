@@ -86,6 +86,19 @@ def get_lead_status_stats(db: Session):
     return stats
 
 
+def get_lead_source_stats(db: Session):
+    rows = (
+        db.query(Lead.source, func.count(Lead.id))
+        .group_by(Lead.source)
+        .all()
+    )
+
+    return {
+        source: count
+        for source, count in rows
+    }
+
+
 def get_lead_by_id(db: Session, lead_id: int):
     return db.query(Lead).filter(Lead.id == lead_id).first()
 
