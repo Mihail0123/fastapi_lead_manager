@@ -22,6 +22,7 @@ def _apply_lead_filters(
         query = query.filter(
             (Lead.name.ilike(search_pattern)) |
             (Lead.email.ilike(search_pattern)) |
+            (Lead.phone.ilike(search_pattern)) |
             (Lead.company.ilike(search_pattern))
         )
 
@@ -111,6 +112,7 @@ def create_lead(db: Session, lead_data: LeadCreate):
     lead = Lead(
         name=lead_data.name,
         email=lead_data.email,
+        phone=lead_data.phone,
         company=lead_data.company,
         source=lead_data.source,
     )

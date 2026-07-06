@@ -5,6 +5,7 @@ def create_lead(
         client: TestClient,
         name: str = "Test Lead",
         email: str = "test@example.com",
+        phone: str | None = None,
         company: str | None = "Test Company",
         source: str = "website",
 ):
@@ -13,6 +14,9 @@ def create_lead(
         "email": email,
         "source": source,
     }
+
+    if phone is not None:
+        payload["phone"] = phone
 
     if company is not None:
         payload["company"] = company
@@ -642,3 +646,57 @@ def test_get_lead_source_stats(client: TestClient):
         "referral": 1,
         "website": 2,
     }
+
+
+def test_create_lead_with_phone(client: TestClient):
+    data = create_lead(
+        client,
+        name="Phone Lead",
+        email="phone@example.com",
+        phone="+49123456789",
+        company="Phone Corp",
+        source="website",
+    )
+
+    assert data["phone"] == "+49123456789"
+
+
+def test_create_lead_without_phone_sets_phone_to_none(client: TestClient):
+    data = create_lead(
+        client,
+        name="No Phone Lead",
+        email="no-phone@example.com",
+        company="No Phone Corp",
+        source="manual",
+    )
+
+    assert data["phone"] is None
+
+
+def test_get_leads_searches_by_phone(client: TestClient):
+    create_lead(
+        client,
+        name="Phone Search Lead",
+        email="phone-search@example.com",
+        phone="+34999111222",
+        company="Phone Search Corp",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Other Lead",
+        email="other-phone-search@example.com",
+        phone="+49111111111",
+        company="Other Corp",
+        source="manual",
+    )
+
+    response = client.get("/leads?search=999111")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert len(data) == 1
+    assert data[0]["email"] == "phone-search@example.com"
+    assert data[0]["phone"] == "+34999111222"

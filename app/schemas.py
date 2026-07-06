@@ -16,6 +16,7 @@ class LeadCreate(BaseModel):
 
     name: str = Field(min_length=1, max_length=100)
     email: EmailStr
+    phone: str | None = Field(default=None, min_length=1, max_length=50)
     company: str | None = Field(default=None, min_length=1, max_length=100)
     source: str = Field(min_length=1, max_length=100)
 
@@ -28,6 +29,7 @@ class LeadRead(BaseModel):
     id: int
     name: str
     email: EmailStr
+    phone: str | None
     company: str | None
     source: str
     status: LeadStatus
