@@ -768,3 +768,87 @@ def test_count_leads_empty_company_filter_returns_422(client: TestClient):
     response = client.get("/leads/count?company=")
 
     assert response.status_code == 422
+
+
+def test_get_leads_sorts_by_name_ascending(client: TestClient):
+    create_lead(
+        client,
+        name="Charlie Lead",
+        email="charlie-sort@example.com",
+        company="Sort Corp",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Alice Lead",
+        email="alice-sort@example.com",
+        company="Sort Corp",
+        source="manual",
+    )
+    create_lead(
+        client,
+        name="Bob Lead",
+        email="bob-sort@example.com",
+        company="Sort Corp",
+        source="referral",
+    )
+
+    response = client.get("/leads?sort_by=name&sort_order=asc")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert [lead["name"] for lead in data] == [
+        "Alice Lead",
+        "Bob Lead",
+        "Charlie Lead",
+    ]
+
+
+def test_get_leads_sorts_by_name_descending(client: TestClient):
+    create_lead(
+        client,
+        name="Charlie Lead",
+        email="charlie-sort-desc@example.com",
+        company="Sort Corp",
+        source="website",
+    )
+    create_lead(
+        client,
+        name="Alice Lead",
+        email="alice-sort-desc@example.com",
+        company="Sort Corp",
+        source="manual",
+    )
+    create_lead(
+        client,
+        name="Bob Lead",
+        email="bob-sort-desc@example.com",
+        company="Sort Corp",
+        source="referral",
+    )
+
+    response = client.get("/leads?sort_by=name&sort_order=desc")
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert [lead["name"] for lead in data] == [
+        "Charlie Lead",
+        "Bob Lead",
+        "Alice Lead",
+    ]
+
+
+def test_get_leads_invalid_sort_by_returns_422(client: TestClient):
+    response = client.get("/leads?sort_by=banana")
+
+    assert response.status_code == 422
+
+
+def test_get_leads_invalid_sort_order_returns_422(client: TestClient):
+    response = client.get("/leads?sort_order=sideways")
+
+    assert response.status_code == 422

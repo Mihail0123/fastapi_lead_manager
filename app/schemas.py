@@ -11,6 +11,23 @@ class LeadStatus(str, Enum):
     lost = "lost"
 
 
+class LeadSortField(str, Enum):
+    id = "id"
+    name = "name"
+    email = "email"
+    phone = "phone"
+    company = "company"
+    source = "source"
+    status = "status"
+    created_at = "created_at"
+    updated_at = "updated_at"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+
 class LeadCreate(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 

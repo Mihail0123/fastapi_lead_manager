@@ -11,6 +11,8 @@ from app.schemas import (
     LeadStatus,
     LeadUpdate,
     LeadStatusStats,
+    LeadSortField,
+    SortOrder,
 )
 
 router = APIRouter(
@@ -42,6 +44,8 @@ def get_leads(
         search: str | None = Query(default=None, min_length=1, max_length=100),
         skip: int = Query(default=0, ge=0),
         limit: int = Query(default=10, ge=1, le=100),
+        sort_by: LeadSortField = LeadSortField.id,
+        sort_order: SortOrder = SortOrder.asc,
         db: Session = Depends(get_db),
 ):
     status_value = status.value if status else None
@@ -54,6 +58,8 @@ def get_leads(
         search=search,
         skip=skip,
         limit=limit,
+        sort_by=sort_by.value,
+        sort_order=sort_order.value,
     )
 
 

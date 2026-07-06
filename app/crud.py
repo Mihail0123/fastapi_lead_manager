@@ -33,6 +33,22 @@ def _apply_lead_filters(
     return query
 
 
+def _get_lead_sort_column(sort_by: str):
+    sort_columns = {
+        "id": Lead.id,
+        "name": Lead.name,
+        "email": Lead.email,
+        "phone": Lead.phone,
+        "company": Lead.company,
+        "source": Lead.source,
+        "status": Lead.status,
+        "created_at": Lead.created_at,
+        "updated_at": Lead.updated_at,
+    }
+
+    return sort_columns[sort_by]
+
+
 def get_leads(
         db: Session,
         status: str | None = None,
@@ -41,6 +57,8 @@ def get_leads(
         search: str | None = None,
         skip: int = 0,
         limit: int = 10,
+        sort_by: str = "id",
+        sort_order: str = "asc",
 ):
     query = db.query(Lead)
 
@@ -52,7 +70,14 @@ def get_leads(
         search=search,
     )
 
-    return query.order_by(Lead.id).offset(skip).limit(limit).all()
+    sort_column = _get_lead_sort_column(sort_by)
+
+    if sort_order == "desc":
+        sort_column = sort_column.desc()
+    else:
+        sort_column = sort_column.asc()
+
+    return query.order_by(sort_column).offset(skip).limit(limit).all()
 
 
 def count_leads(
