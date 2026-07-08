@@ -121,7 +121,7 @@ def update_lead(
             detail=f"Lead with id {lead_id} doesn't exist",
         )
 
-    return crud.update_lead_status(db, lead, lead_data)
+    return crud.update_lead(db, lead, lead_data)
 
 
 @router.delete("/{lead_id}", response_model=LeadDeleteResponse)

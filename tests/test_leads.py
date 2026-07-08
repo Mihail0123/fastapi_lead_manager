@@ -852,3 +852,125 @@ def test_get_leads_invalid_sort_order_returns_422(client: TestClient):
     response = client.get("/leads?sort_order=sideways")
 
     assert response.status_code == 422
+
+
+def test_update_lead_fields(client: TestClient):
+    created_lead = create_lead(
+        client,
+        name="Original Name",
+        email="update-fields@example.com",
+        phone="+49111111111",
+        company="Old Company",
+        source="website",
+    )
+
+    response = client.patch(
+        f"/leads/{created_lead['id']}",
+        json={
+            "name": "Updated Name",
+            "phone": "+49222222222",
+            "company": "New Company",
+            "source": "manual",
+            "status": "contacted",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["id"] == created_lead["id"]
+    assert data["name"] == "Updated Name"
+    assert data["email"] == "update-fields@example.com"
+    assert data["phone"] == "+49222222222"
+    assert data["company"] == "New Company"
+    assert data["source"] == "manual"
+    assert data["status"] == "contacted"
+
+
+def test_update_lead_partial_fields(client: TestClient):
+    created_lead = create_lead(
+        client,
+        name="Partial Update Lead",
+        email="partial-update@example.com",
+        phone="+49111111111",
+        company="Partial Corp",
+        source="website",
+    )
+
+    response = client.patch(
+        f"/leads/{created_lead['id']}",
+        json={"phone": "+49333333333"},
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["name"] == "Partial Update Lead"
+    assert data["email"] == "partial-update@example.com"
+    assert data["phone"] == "+49333333333"
+    assert data["company"] == "Partial Corp"
+    assert data["source"] == "website"
+    assert data["status"] == "new"
+
+
+def test_update_lead_with_empty_body_returns_422(client: TestClient):
+    created_lead = create_lead(
+        client,
+        name="Empty Update Lead",
+        email="empty-update@example.com",
+        company="Empty Corp",
+        source="website",
+    )
+
+    response = client.patch(
+        f"/leads/{created_lead['id']}",
+        json={},
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_lead_with_empty_string_returns_422(client: TestClient):
+    created_lead = create_lead(
+        client,
+        name="Empty String Update Lead",
+        email="empty-string-update@example.com",
+        company="Empty String Corp",
+        source="website",
+    )
+
+    response = client.patch(
+        f"/leads/{created_lead['id']}",
+        json={"name": ""},
+    )
+
+    assert response.status_code == 422
+
+
+def test_update_lead_strips_whitespace(client: TestClient):
+    created_lead = create_lead(
+        client,
+        name="Whitespace Update Lead",
+        email="whitespace-update@example.com",
+        company="Whitespace Corp",
+        source="website",
+    )
+
+    response = client.patch(
+        f"/leads/{created_lead['id']}",
+        json={
+            "name": "   Clean Name   ",
+            "company": "   Clean Company   ",
+            "source": "   manual   ",
+        },
+    )
+
+    assert response.status_code == 200
+
+    data = response.json()
+
+    assert data["name"] == "Clean Name"
+    assert data["company"] == "Clean Company"
+    assert data["source"] == "manual"

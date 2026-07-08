@@ -157,8 +157,14 @@ def create_lead(db: Session, lead_data: LeadCreate):
     return lead
 
 
-def update_lead_status(db: Session, lead: Lead, lead_data: LeadUpdate):
-    lead.status = lead_data.status.value
+def update_lead(db: Session, lead: Lead, lead_data: LeadUpdate):
+    update_data = lead_data.model_dump(exclude_unset=True)
+
+    if "status" in update_data:
+        update_data["status"] = update_data["status"].value
+
+    for field, value in update_data.items():
+        setattr(lead, field, value)
 
     db.commit()
     db.refresh(lead)

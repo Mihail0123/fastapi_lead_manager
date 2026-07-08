@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, model_validator
 
 
 class LeadStatus(str, Enum):
@@ -39,7 +39,20 @@ class LeadCreate(BaseModel):
 
 
 class LeadUpdate(BaseModel):
-    status: LeadStatus
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    phone: str | None = Field(default=None, min_length=1, max_length=50)
+    company: str | None = Field(default=None, min_length=1, max_length=100)
+    source: str | None = Field(default=None, min_length=1, max_length=100)
+    status: LeadStatus | None = None
+
+    @model_validator(mode="after")
+    def validate_at_least_one_field(self):
+        if not self.model_fields_set:
+            raise ValueError("At least one field must be provided")
+
+        return self
 
 
 class LeadRead(BaseModel):
